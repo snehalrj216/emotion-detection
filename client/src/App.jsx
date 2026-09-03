@@ -3,7 +3,6 @@ import * as faceapi from "face-api.js";
 import Webcam from "react-webcam";
 import "./App.css";
 
-
 // ==========================================
 // EMOTION DATA
 // ==========================================
@@ -13,32 +12,37 @@ const emotionData = {
     label: "Happy",
     emoji: "😊",
   },
+
   sad: {
     label: "Sad",
     emoji: "😢",
   },
+
   angry: {
     label: "Angry",
     emoji: "😡",
   },
+
   fearful: {
     label: "Fear",
     emoji: "😨",
   },
+
   disgusted: {
     label: "Disgusted",
     emoji: "🤢",
   },
+
   surprised: {
     label: "Surprised",
     emoji: "😮",
   },
+
   neutral: {
     label: "Neutral",
     emoji: "😐",
   },
 };
-
 
 // ==========================================
 // CONFIDENCE THRESHOLD
@@ -46,82 +50,65 @@ const emotionData = {
 
 const CONFIDENCE_THRESHOLD = 0.6;
 
-
 // ==========================================
 // APP
 // ==========================================
 
 function App() {
-
   const webcamRef = useRef(null);
 
   const detectionInterval = useRef(null);
 
+  // Stores the last emotion shown in Recent Detections
   const lastHistoryEmotion = useRef(null);
 
-  const sessionStartTime = useRef(null);
+  // Prevents multiple async detections from running together
+  const detectionInProgress = useRef(false);
 
+  const sessionStartTime = useRef(null);
 
   // ========================================
   // STATES
   // ========================================
 
-  const [modelsLoaded, setModelsLoaded] =
-    useState(false);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
 
-  const [cameraOn, setCameraOn] =
-    useState(false);
+  const [cameraOn, setCameraOn] = useState(false);
 
-  const [currentEmotion, setCurrentEmotion] =
-    useState(null);
+  const [currentEmotion, setCurrentEmotion] = useState(null);
 
-  const [confidence, setConfidence] =
-    useState(0);
+  const [confidence, setConfidence] = useState(0);
 
-  const [history, setHistory] =
-    useState([]);
+  const [history, setHistory] = useState([]);
 
+  const [analytics, setAnalytics] = useState({
+    total: 0,
 
-  const [analytics, setAnalytics] =
-    useState({
+    emotions: {
+      happy: 0,
+      sad: 0,
+      angry: 0,
+      fearful: 0,
+      disgusted: 0,
+      surprised: 0,
+      neutral: 0,
+    },
+  });
 
-      total: 0,
+  const [sessionDuration, setSessionDuration] = useState(0);
 
-      emotions: {
-        happy: 0,
-        sad: 0,
-        angry: 0,
-        fearful: 0,
-        disgusted: 0,
-        surprised: 0,
-        neutral: 0,
-      },
+  const [totalConfidence, setTotalConfidence] = useState(0);
 
-    });
-
-
-  const [sessionDuration, setSessionDuration] =
-    useState(0);
-
-  const [totalConfidence, setTotalConfidence] =
-    useState(0);
-
-  const [emotionChanges, setEmotionChanges] =
-    useState(0);
-
+  const [emotionChanges, setEmotionChanges] = useState(0);
 
   // ========================================
   // LOAD AI MODELS
   // ========================================
 
   useEffect(() => {
-
     const loadModels = async () => {
-
       try {
-
         const MODEL_URL = "/models";
-
 
         await faceapi.nets.tinyFaceDetector.loadFromUri(
           MODEL_URL
@@ -135,49 +122,35 @@ function App() {
           MODEL_URL
         );
 
-
         setModelsLoaded(true);
 
         console.log(
           "AI Models Loaded Successfully"
         );
-
       } catch (error) {
-
         console.error(
           "Model loading error:",
           error
         );
-
       }
-
     };
-
 
     loadModels();
 
-
     return () => {
-
       if (detectionInterval.current) {
-
         clearInterval(
           detectionInterval.current
         );
-
       }
-
     };
-
   }, []);
-
 
   // ========================================
   // SESSION TIMER
   // ========================================
 
   useEffect(() => {
-
     if (
       !cameraOn ||
       !sessionStartTime.current
@@ -185,32 +158,24 @@ function App() {
       return;
     }
 
-
     const timer = setInterval(() => {
-
       const elapsed = Math.floor(
         (Date.now() -
           sessionStartTime.current) /
           1000
       );
 
-
       setSessionDuration(elapsed);
-
     }, 1000);
 
-
     return () => clearInterval(timer);
-
   }, [cameraOn]);
-
 
   // ========================================
   // DETECT EMOTION
   // ========================================
 
   const detectEmotion = async () => {
-
     if (
       !webcamRef.current ||
       !webcamRef.current.video ||
@@ -220,9 +185,17 @@ function App() {
       return;
     }
 
+    // ======================================
+    // PREVENT OVERLAPPING DETECTIONS
+    // ======================================
+
+    if (detectionInProgress.current) {
+      return;
+    }
+
+    detectionInProgress.current = true;
 
     try {
-
       const detection =
         await faceapi
           .detectSingleFace(
@@ -232,17 +205,17 @@ function App() {
           .withFaceLandmarks()
           .withFaceExpressions();
 
-
+      // No face detected
       if (!detection) {
         return;
       }
 
-
       const expressions =
         detection.expressions;
 
-
-      // Find strongest emotion
+      // ======================================
+      // FIND STRONGEST EMOTION
+      // ======================================
 
       const strongestEmotion =
         Object.keys(expressions).reduce(
@@ -253,14 +226,12 @@ function App() {
               : b
         );
 
-
       const emotionConfidence =
-        expressions[
-          strongestEmotion
-        ];
+        expressions[strongestEmotion];
 
-
-      // Ignore low-confidence results
+      // ======================================
+      // IGNORE LOW-CONFIDENCE RESULTS
+      // ======================================
 
       if (
         emotionConfidence <
@@ -269,21 +240,18 @@ function App() {
         return;
       }
 
-
       const displayEmotion =
         emotionData[
           strongestEmotion
         ]?.label ||
         strongestEmotion;
 
-
       const numericConfidence =
         emotionConfidence * 100;
 
-
-      // ====================================
+      // ======================================
       // CURRENT EMOTION
-      // ====================================
+      // ======================================
 
       setCurrentEmotion(
         displayEmotion
@@ -293,52 +261,44 @@ function App() {
         numericConfidence
       );
 
-
-      // ====================================
+      // ======================================
       // ANALYTICS
-      // ====================================
+      // ======================================
 
       setAnalytics((previous) => ({
-
         total:
           previous.total + 1,
 
         emotions: {
-
           ...previous.emotions,
 
           [strongestEmotion]:
             previous.emotions[
               strongestEmotion
             ] + 1,
-
         },
-
       }));
 
-
-      // ====================================
-      // CONFIDENCE
-      // ====================================
+      // ======================================
+      // TOTAL CONFIDENCE
+      // ======================================
 
       setTotalConfidence(
         (previous) =>
-          previous + numericConfidence
+          previous +
+          numericConfidence
       );
 
-
-      // ====================================
+      // ======================================
       // SMART HISTORY
       // Only save when emotion changes
-      // ====================================
+      // ======================================
 
       if (
         lastHistoryEmotion.current !==
         displayEmotion
       ) {
-
         const newDetection = {
-
           emotion:
             displayEmotion,
 
@@ -351,61 +311,49 @@ function App() {
           emoji:
             emotionData[
               strongestEmotion
-            ]?.emoji || "🙂",
-
+            ]?.emoji ||
+            "🙂",
         };
 
-
-        setHistory((previous) =>
-          [
-            newDetection,
-            ...previous,
-          ].slice(0, 5)
-        );
-
+        setHistory((previous) => [
+          newDetection,
+          ...previous,
+        ].slice(0, 5));
 
         // Don't count the first
         // detection as a change
-
         if (
           lastHistoryEmotion.current !==
           null
         ) {
-
           setEmotionChanges(
             (previous) =>
               previous + 1
           );
-
         }
-
 
         lastHistoryEmotion.current =
           displayEmotion;
-
       }
-
     } catch (error) {
-
       console.error(
         "Emotion detection error:",
         error
       );
-
+    } finally {
+      // Allow the next detection
+      detectionInProgress.current =
+        false;
     }
-
   };
-
 
   // ========================================
   // START CAMERA
   // ========================================
 
   const startCamera = () => {
-
     sessionStartTime.current =
       Date.now();
-
 
     setSessionDuration(0);
 
@@ -419,79 +367,10 @@ function App() {
 
     setHistory([]);
 
-
-    lastHistoryEmotion.current =
-      null;
-
-
-    setCameraOn(true);
-
-
-    if (detectionInterval.current) {
-
-      clearInterval(
-        detectionInterval.current
-      );
-
-    }
-
-
-    detectionInterval.current =
-      setInterval(
-        detectEmotion,
-        1000
-      );
-
-  };
-
-
-  // ========================================
-  // STOP CAMERA
-  // ========================================
-
-  const stopCamera = () => {
-
-    setCameraOn(false);
-
-
-    if (detectionInterval.current) {
-
-      clearInterval(
-        detectionInterval.current
-      );
-
-      detectionInterval.current =
-        null;
-
-    }
-
-
-    setCurrentEmotion(null);
-
-    setConfidence(0);
-
-
-    sessionStartTime.current =
-      null;
-
-    lastHistoryEmotion.current =
-      null;
-
-  };
-
-
-  // ========================================
-  // RESET ANALYTICS
-  // ========================================
-
-  const resetAnalytics = () => {
-
     setAnalytics({
-
       total: 0,
 
       emotions: {
-
         happy: 0,
         sad: 0,
         angry: 0,
@@ -499,11 +378,78 @@ function App() {
         disgusted: 0,
         surprised: 0,
         neutral: 0,
-
       },
-
     });
 
+    lastHistoryEmotion.current =
+      null;
+
+    detectionInProgress.current =
+      false;
+
+    setCameraOn(true);
+
+    if (detectionInterval.current) {
+      clearInterval(
+        detectionInterval.current
+      );
+    }
+
+    detectionInterval.current =
+      setInterval(
+        detectEmotion,
+        1000
+      );
+  };
+
+  // ========================================
+  // STOP CAMERA
+  // ========================================
+
+  const stopCamera = () => {
+    setCameraOn(false);
+
+    if (detectionInterval.current) {
+      clearInterval(
+        detectionInterval.current
+      );
+
+      detectionInterval.current =
+        null;
+    }
+
+    setCurrentEmotion(null);
+
+    setConfidence(0);
+
+    sessionStartTime.current =
+      null;
+
+    lastHistoryEmotion.current =
+      null;
+
+    detectionInProgress.current =
+      false;
+  };
+
+  // ========================================
+  // RESET ANALYTICS
+  // ========================================
+
+  const resetAnalytics = () => {
+    setAnalytics({
+      total: 0,
+
+      emotions: {
+        happy: 0,
+        sad: 0,
+        angry: 0,
+        fearful: 0,
+        disgusted: 0,
+        surprised: 0,
+        neutral: 0,
+      },
+    });
 
     setHistory([]);
 
@@ -517,12 +463,12 @@ function App() {
 
     setEmotionChanges(0);
 
-
     lastHistoryEmotion.current =
       null;
 
+    detectionInProgress.current =
+      false;
   };
-
 
   // ========================================
   // FORMAT DURATION
@@ -531,22 +477,18 @@ function App() {
   const formatDuration = (
     seconds
   ) => {
-
     const minutes =
       Math.floor(seconds / 60);
 
     const remainingSeconds =
       seconds % 60;
 
-
     return `${String(
       minutes
     ).padStart(2, "0")}:${String(
       remainingSeconds
     ).padStart(2, "0")}`;
-
   };
-
 
   // ========================================
   // DOMINANT EMOTION
@@ -562,7 +504,6 @@ function App() {
         : b
     );
 
-
   const dominantEmotion =
     analytics.total > 0
       ? emotionData[
@@ -570,14 +511,12 @@ function App() {
         ]?.label
       : "—";
 
-
   const dominantEmoji =
     analytics.total > 0
       ? emotionData[
           dominantEmotionKey
         ]?.emoji
       : "🙂";
-
 
   // ========================================
   // AVERAGE CONFIDENCE
@@ -591,35 +530,30 @@ function App() {
         ).toFixed(1)
       : "0.0";
 
-
   // ========================================
   // EMOTION PERCENTAGES
   // ========================================
 
   const getPercentage = (key) => {
-
-    if (analytics.total === 0) {
+    if (
+      analytics.total === 0
+    ) {
       return "0.0";
     }
-
 
     return (
       (analytics.emotions[key] /
         analytics.total) *
       100
     ).toFixed(1);
-
   };
-
 
   // ========================================
   // RENDER
   // ========================================
 
   return (
-
     <div className="app">
-
 
       {/* ==================================
           HEADER
@@ -637,7 +571,6 @@ function App() {
         </p>
 
       </header>
-
 
       {/* ==================================
           CAMERA
@@ -681,7 +614,6 @@ function App() {
 
         </div>
 
-
         <div className="camera-controls">
 
           {!cameraOn ? (
@@ -713,7 +645,6 @@ function App() {
 
         </div>
 
-
         {/* CURRENT EMOTION */}
 
         {currentEmotion &&
@@ -735,7 +666,6 @@ function App() {
 
               </span>
 
-
               <div>
 
                 <span>
@@ -748,7 +678,6 @@ function App() {
 
               </div>
 
-
               <div className="confidence">
 
                 {confidence.toFixed(1)}%
@@ -760,7 +689,6 @@ function App() {
           )}
 
       </section>
-
 
       {/* ==================================
           SESSION OVERVIEW
@@ -781,9 +709,7 @@ function App() {
 
         </div>
 
-
         <div className="session-grid">
-
 
           <div className="session-card">
 
@@ -807,7 +733,6 @@ function App() {
 
           </div>
 
-
           <div className="session-card">
 
             <span className="session-icon">
@@ -827,7 +752,6 @@ function App() {
             </div>
 
           </div>
-
 
           <div className="session-card">
 
@@ -849,7 +773,6 @@ function App() {
 
           </div>
 
-
           <div className="session-card">
 
             <span className="session-icon">
@@ -869,7 +792,6 @@ function App() {
             </div>
 
           </div>
-
 
           <div className="session-card">
 
@@ -891,18 +813,15 @@ function App() {
 
           </div>
 
-
         </div>
 
       </section>
-
 
       {/* ==================================
           DASHBOARD
       ================================== */}
 
       <section className="dashboard">
-
 
         {/* =================================
             RECENT DETECTIONS
@@ -925,7 +844,6 @@ function App() {
             </div>
 
           </div>
-
 
           {history.length === 0 ? (
 
@@ -980,7 +898,6 @@ function App() {
 
         </div>
 
-
         {/* =================================
             EMOTION ANALYTICS
         ================================= */}
@@ -1001,7 +918,6 @@ function App() {
 
             </div>
 
-
             <button
               className="reset-btn"
               onClick={resetAnalytics}
@@ -1010,7 +926,6 @@ function App() {
             </button>
 
           </div>
-
 
           {/* TOP CARDS */}
 
@@ -1036,7 +951,6 @@ function App() {
 
             </div>
 
-
             <div className="analytics-card">
 
               <span>
@@ -1059,7 +973,6 @@ function App() {
 
           </div>
 
-
           {/* EMOTION BARS */}
 
           <div className="emotion-grid">
@@ -1070,7 +983,6 @@ function App() {
 
               const percentage =
                 getPercentage(key);
-
 
               return (
 
@@ -1099,7 +1011,6 @@ function App() {
 
                     </span>
 
-
                     <span className="emotion-percentage">
 
                       {percentage}%
@@ -1107,7 +1018,6 @@ function App() {
                     </span>
 
                   </div>
-
 
                   <div className="progress-bar">
 
@@ -1129,7 +1039,6 @@ function App() {
 
           </div>
 
-
           {/* SMALL STATS */}
 
           <div className="analytics-stats">
@@ -1145,7 +1054,6 @@ function App() {
               </strong>
 
             </div>
-
 
             <div>
 
@@ -1164,7 +1072,6 @@ function App() {
         </div>
 
       </section>
-
 
       {/* ==================================
           HOW IT WORKS
@@ -1185,9 +1092,7 @@ function App() {
 
         </div>
 
-
         <div className="steps">
-
 
           <div className="step-card">
 
@@ -1210,7 +1115,6 @@ function App() {
 
           </div>
 
-
           <div className="step-card">
 
             <span>
@@ -1231,7 +1135,6 @@ function App() {
             </p>
 
           </div>
-
 
           <div className="step-card">
 
@@ -1254,7 +1157,6 @@ function App() {
 
           </div>
 
-
           <div className="step-card">
 
             <span>
@@ -1276,11 +1178,9 @@ function App() {
 
           </div>
 
-
         </div>
 
       </section>
-
 
       {/* ==================================
           FOOTER
@@ -1290,11 +1190,8 @@ function App() {
         Powered by React • face-api.js • AI
       </footer>
 
-
     </div>
-
   );
 }
-
 
 export default App;
