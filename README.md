@@ -2,7 +2,7 @@
 
 A real-time facial emotion detection web application built using React and face-api.js.
 
-The application uses a webcam to analyze facial expressions and identify the most likely emotion along with its confidence score. It also provides session-based analytics and tracks changes in detected emotions.
+The application uses webcam input to analyze facial expressions and identify the most likely emotion along with its confidence score. It also provides session-based analytics and tracks changes in detected emotions.
 
 ## ✨ Features
 
@@ -83,6 +83,16 @@ Displays the percentage distribution of detected emotions during the current ses
 
 Tracks recent emotion changes instead of repeatedly displaying the same emotion during every detection cycle.
 
+## 🎥 Demo
+
+The application performs real-time facial emotion detection using webcam input.
+
+> **Demo Note:** The demo video uses AI-generated test footage with clear and exaggerated facial expressions, which results in very high confidence scores. With real webcam input and more subtle expressions, confidence scores may vary depending on the expression and detection conditions.
+
+## 📸 Screenshots
+
+Screenshots of the application dashboard and emotion analytics will be added here.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -98,4 +108,4 @@ Make sure you have the following installed:
 Clone the repository:
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/snehalrj216/emotion-detection.git
