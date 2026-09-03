@@ -57,6 +57,9 @@ const CONFIDENCE_THRESHOLD = 0.6;
 function App() {
   const webcamRef = useRef(null);
 
+  // NEW: canvas overlay for drawing face box + landmarks
+  const canvasRef = useRef(null);
+
   const detectionInterval = useRef(null);
 
   // Stores the last emotion shown in Recent Detections
@@ -73,11 +76,17 @@ function App() {
 
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
+  // NEW: surface model load failures instead of an infinite "Loading..." button
+  const [modelError, setModelError] = useState(null);
+
   const [cameraOn, setCameraOn] = useState(false);
 
   const [currentEmotion, setCurrentEmotion] = useState(null);
 
   const [confidence, setConfidence] = useState(0);
+
+  // NEW: tracks whether a face is currently visible in frame
+  const [faceDetected, setFaceDetected] = useState(false);
 
   const [history, setHistory] = useState([]);
 
@@ -123,6 +132,7 @@ function App() {
         );
 
         setModelsLoaded(true);
+        setModelError(null);
 
         console.log(
           "AI Models Loaded Successfully"
@@ -131,6 +141,11 @@ function App() {
         console.error(
           "Model loading error:",
           error
+        );
+
+        // NEW: show a real message instead of leaving the button stuck
+        setModelError(
+          "Couldn't load the AI models. Check your connection and refresh the page."
         );
       }
     };
@@ -196,19 +211,59 @@ function App() {
     detectionInProgress.current = true;
 
     try {
+      const video = webcamRef.current.video;
+
       const detection =
         await faceapi
           .detectSingleFace(
-            webcamRef.current.video,
+            video,
             new faceapi.TinyFaceDetectorOptions()
           )
           .withFaceLandmarks()
           .withFaceExpressions();
 
-      // No face detected
+      // ======================================
+      // NEW: keep the overlay canvas in sync
+      // with the video element's rendered size
+      // ======================================
+
+      const canvas = canvasRef.current;
+
+      if (canvas) {
+        const displaySize = {
+          width: video.videoWidth,
+          height: video.videoHeight,
+        };
+
+        faceapi.matchDimensions(canvas, displaySize);
+
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (detection) {
+          const resized = faceapi.resizeResults(
+            detection,
+            displaySize
+          );
+
+          faceapi.draw.drawDetections(canvas, resized);
+          faceapi.draw.drawFaceLandmarks(canvas, resized);
+        }
+      }
+
+      // ======================================
+      // NEW: no face in frame — clear current
+      // emotion instead of leaving a stale label
+      // ======================================
+
       if (!detection) {
+        setFaceDetected(false);
+        setCurrentEmotion(null);
+        setConfidence(0);
         return;
       }
+
+      setFaceDetected(true);
 
       const expressions =
         detection.expressions;
@@ -237,6 +292,11 @@ function App() {
         emotionConfidence <
         CONFIDENCE_THRESHOLD
       ) {
+        // NEW: still a face, just not a confident
+        // read — reflect that instead of freezing
+        // on the last confident label
+        setCurrentEmotion(null);
+        setConfidence(0);
         return;
       }
 
@@ -365,6 +425,8 @@ function App() {
 
     setConfidence(0);
 
+    setFaceDetected(false);
+
     setHistory([]);
 
     setAnalytics({
@@ -422,6 +484,8 @@ function App() {
 
     setConfidence(0);
 
+    setFaceDetected(false);
+
     sessionStartTime.current =
       null;
 
@@ -430,6 +494,13 @@ function App() {
 
     detectionInProgress.current =
       false;
+
+    // NEW: clear any leftover box/landmarks drawn on canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
   };
 
   // ========================================
@@ -582,14 +653,39 @@ function App() {
 
           {cameraOn ? (
 
-            <Webcam
-              ref={webcamRef}
-              audio={false}
-              className="webcam"
-              videoConstraints={{
-                facingMode: "user",
-              }}
-            />
+            <div className="webcam-wrapper" style={{ position: "relative" }}>
+
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                className="webcam"
+                videoConstraints={{
+                  facingMode: "user",
+                }}
+              />
+
+              {/* NEW: overlay canvas for face box + landmarks */}
+              <canvas
+                ref={canvasRef}
+                className="overlay-canvas"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* NEW: visible "no face detected" hint */}
+              {!faceDetected && (
+                <div className="no-face-badge">
+                  No face detected
+                </div>
+              )}
+
+            </div>
 
           ) : (
 
@@ -624,7 +720,9 @@ function App() {
               disabled={!modelsLoaded}
             >
 
-              {modelsLoaded
+              {modelError
+                ? "⚠ Models Failed to Load"
+                : modelsLoaded
                 ? "▶ Start Camera"
                 : "⏳ Loading AI Models..."}
 
@@ -645,10 +743,18 @@ function App() {
 
         </div>
 
+        {/* NEW: visible error message if models failed to load */}
+        {modelError && (
+          <p className="model-error">
+            {modelError}
+          </p>
+        )}
+
         {/* CURRENT EMOTION */}
 
-        {currentEmotion &&
-          cameraOn && (
+        {cameraOn && (
+
+          currentEmotion ? (
 
             <div className="current-emotion">
 
@@ -686,7 +792,35 @@ function App() {
 
             </div>
 
-          )}
+          ) : (
+
+            // NEW: explicit state instead of showing
+            // nothing / a stale label
+            <div className="current-emotion current-emotion--empty">
+
+              <span className="emotion-emoji">
+                🙂
+              </span>
+
+              <div>
+
+                <span>
+                  Current Emotion
+                </span>
+
+                <strong>
+                  {faceDetected
+                    ? "Analyzing..."
+                    : "No face in frame"}
+                </strong>
+
+              </div>
+
+            </div>
+
+          )
+
+        )}
 
       </section>
 
@@ -1187,7 +1321,7 @@ function App() {
       ================================== */}
 
       <footer>
-        Powered by React • face-api.js • AI
+        Powered by React • face-api.js • AI — runs 100% client-side, no video data leaves your browser
       </footer>
 
     </div>
