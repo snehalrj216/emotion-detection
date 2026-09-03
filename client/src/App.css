@@ -1,0 +1,979 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+
+/* =========================================
+   GLOBAL
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: #0b1428;
+  color: white;
+  overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: "Poppins", sans-serif;
+}
+
+button {
+  font-family: inherit;
+}
+
+#root {
+  max-width: none;
+  width: 100%;
+}
+
+
+/* =========================================
+   APP
+========================================= */
+
+.app {
+  width: 100%;
+  min-width: 100%;
+  min-height: 100vh;
+
+  padding: 28px 42px 20px;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      #252060 0%,
+      #101a32 38%,
+      #0b1428 100%
+    );
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin: 0 0 7px;
+
+  font-size: 32px;
+  font-weight: 600;
+
+  letter-spacing: -0.6px;
+}
+
+.header p {
+  margin: 0;
+
+  color: #91b3e9;
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+
+/* =========================================
+   CAMERA
+========================================= */
+
+.camera-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.camera-container {
+  width: 900px;
+  height: 420px;
+
+  max-width: 100%;
+
+  overflow: hidden;
+
+  background: #050b18;
+
+  border: 1px solid
+    rgba(150, 170, 220, 0.25);
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 15px 40px
+    rgba(0, 0, 0, 0.25);
+}
+
+.webcam {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transform: scaleX(-1);
+}
+
+.camera-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  text-align: center;
+}
+
+.camera-placeholder span {
+  font-size: 48px;
+
+  margin-bottom: 12px;
+}
+
+.camera-placeholder h3 {
+  margin: 0 0 7px;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.camera-placeholder p {
+  margin: 0;
+
+  color: #91a4c9;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   CAMERA BUTTONS
+========================================= */
+
+.camera-controls {
+  margin-top: 14px;
+}
+
+.start-btn,
+.stop-btn {
+  border: none;
+
+  padding: 11px 25px;
+
+  border-radius: 10px;
+
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.start-btn {
+  background: #6366f1;
+}
+
+.stop-btn {
+  background: #ef4444;
+}
+
+.start-btn:hover,
+.stop-btn:hover {
+  transform: translateY(-1px);
+
+  opacity: 0.9;
+}
+
+.start-btn:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   CURRENT EMOTION
+========================================= */
+
+.current-emotion {
+  margin-top: 14px;
+
+  width: 350px;
+
+  max-width: 100%;
+
+  padding: 13px 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  background: #1d2a48;
+
+  border: 1px solid
+    rgba(150, 170, 220, 0.18);
+
+  border-radius: 12px;
+}
+
+.emotion-emoji {
+  font-size: 28px;
+}
+
+.current-emotion span:not(.emotion-emoji) {
+  display: block;
+
+  color: #91a4d0;
+
+  font-size: 11px;
+}
+
+.current-emotion strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+}
+
+.confidence {
+  margin-left: auto;
+
+  color: #8db5ff;
+
+  font-size: 18px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   SESSION OVERVIEW
+========================================= */
+
+.session-overview {
+  width: 100%;
+
+  margin-top: 18px;
+
+  padding: 20px;
+
+  background: #1d2a48;
+
+  border: 1px solid
+    rgba(150, 170, 220, 0.18);
+
+  border-radius: 18px;
+}
+
+.session-heading {
+  margin-bottom: 18px;
+}
+
+.session-heading h2 {
+  margin: 0;
+
+  font-size: 23px;
+
+  font-weight: 600;
+
+  letter-spacing: -0.3px;
+}
+
+.session-heading p {
+  margin: 7px 0 0;
+
+  color: #91b3e9;
+
+  font-size: 13px;
+
+  font-weight: 400;
+}
+
+.session-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, 1fr);
+
+  gap: 10px;
+}
+
+.session-card {
+  min-width: 0;
+
+  padding: 15px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  background: #0d172d;
+
+  border-radius: 12px;
+}
+
+.session-icon {
+  font-size: 23px;
+}
+
+.session-card small {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #91a4d0;
+
+  font-size: 11px;
+
+  font-weight: 400;
+}
+
+.session-card strong {
+  display: block;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+.dashboard {
+  width: 100%;
+
+  margin-top: 16px;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 14px;
+}
+
+
+/* =========================================
+   SECTIONS
+========================================= */
+
+.recent-section,
+.analytics-section {
+  min-width: 0;
+
+  padding: 20px;
+
+  background: #1d2a48;
+
+  border: 1px solid
+    rgba(150, 170, 220, 0.18);
+
+  border-radius: 18px;
+}
+
+.section-heading {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 18px;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: white;
+
+  font-size: 23px;
+
+  font-weight: 600;
+
+  letter-spacing: -0.3px;
+}
+
+.section-heading p {
+  margin: 7px 0 0;
+
+  color: #91b3e9;
+
+  font-size: 13px;
+
+  font-weight: 400;
+}
+
+
+/* =========================================
+   RECENT DETECTIONS
+========================================= */
+
+.history-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.history-item {
+  display: grid;
+
+  grid-template-columns:
+    32px 1fr auto auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 13px 15px;
+
+  background: #0d172d;
+
+  border-radius: 12px;
+}
+
+.history-emoji {
+  font-size: 20px;
+}
+
+.history-item strong {
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+.history-confidence {
+  color: #8db5ff;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.history-time {
+  color: #91a4c9;
+
+  font-size: 12px;
+
+  font-weight: 400;
+}
+
+.empty-state {
+  min-height: 130px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  color: #91a4c9;
+
+  text-align: center;
+}
+
+.empty-state span {
+  font-size: 30px;
+
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  margin: 0;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   ANALYTICS TOP
+========================================= */
+
+.analytics-top {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.analytics-card {
+  padding: 14px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  background: #0d172d;
+
+  border-radius: 12px;
+}
+
+.analytics-card > span {
+  font-size: 25px;
+}
+
+.analytics-card small {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #91a4d0;
+
+  font-size: 12px;
+
+  font-weight: 400;
+}
+
+.analytics-card strong {
+  color: white;
+
+  font-size: 18px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   EMOTION GRID
+========================================= */
+
+.emotion-grid {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 8px;
+}
+
+.emotion-item {
+  padding: 10px;
+
+  background: #111d34;
+
+  border-radius: 10px;
+}
+
+.emotion-info {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 6px;
+
+  margin-bottom: 7px;
+}
+
+.emotion-name {
+  color: white;
+
+  font-size: 12px;
+
+  font-weight: 500;
+}
+
+.emotion-percentage {
+  color: #8db5ff;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+
+  height: 5px;
+
+  background: #293754;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #6366f1,
+      #a855f7
+    );
+
+  border-radius: 10px;
+
+  transition:
+    width 0.4s ease;
+}
+
+
+/* =========================================
+   ANALYTICS STATS
+========================================= */
+
+.analytics-stats {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.analytics-stats > div {
+  padding: 11px;
+
+  background: #111d34;
+
+  border-radius: 10px;
+
+  text-align: center;
+}
+
+.analytics-stats small {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #91a4d0;
+
+  font-size: 11px;
+
+  font-weight: 400;
+}
+
+.analytics-stats strong {
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================
+   RESET BUTTON
+========================================= */
+
+.reset-btn {
+  border: none;
+
+  padding: 10px 22px;
+
+  border-radius: 10px;
+
+  background: #6366f1;
+
+  color: white;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.reset-btn:hover {
+  transform: translateY(-1px);
+
+  opacity: 0.9;
+}
+
+
+/* =========================================
+   HOW IT WORKS
+========================================= */
+
+.how-it-works {
+  width: 100%;
+
+  margin-top: 16px;
+
+  padding: 24px;
+
+  background: #1d2a48;
+
+  border: 1px solid
+    rgba(150, 170, 220, 0.18);
+
+  border-radius: 18px;
+}
+
+.how-heading {
+  text-align: center;
+
+  margin-bottom: 20px;
+}
+
+.how-heading h2 {
+  margin: 0 0 6px;
+
+  color: white;
+
+  font-size: 25px;
+
+  font-weight: 600;
+
+  letter-spacing: -0.3px;
+}
+
+.how-heading p {
+  margin: 0;
+
+  color: #91b3e9;
+
+  font-size: 13px;
+
+  font-weight: 400;
+}
+
+.steps {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 10px;
+}
+
+.step-card {
+  padding: 18px 14px;
+
+  text-align: center;
+
+  background: #39466d;
+
+  border: 1px solid
+    rgba(180, 195, 235, 0.12);
+
+  border-radius: 13px;
+}
+
+.step-card > span {
+  display: block;
+
+  font-size: 27px;
+
+  margin-bottom: 6px;
+}
+
+.step-card small {
+  color: #a9c4ff;
+
+  font-size: 11px;
+
+  font-weight: 500;
+}
+
+.step-card h3 {
+  margin: 14px 0 8px;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+}
+
+.step-card p {
+  margin: 0;
+
+  color: #c1cbe0;
+
+  font-size: 12px;
+
+  font-weight: 400;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+footer {
+  padding: 20px 0 5px;
+
+  text-align: center;
+
+  color: #7188b8;
+
+  font-size: 12px;
+
+  font-weight: 400;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+  .session-grid {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .steps {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 900px) {
+
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-container {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .app {
+    padding: 20px 15px;
+  }
+
+  .camera-container {
+    height: 330px;
+  }
+
+  .session-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .analytics-top {
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .header h1 {
+    font-size: 25px;
+  }
+
+  .camera-container {
+    height: 280px;
+  }
+
+  .current-emotion {
+    width: 100%;
+  }
+
+  .session-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .emotion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .history-item {
+    grid-template-columns:
+      30px 1fr auto;
+  }
+
+  .history-time {
+    display: none;
+  }
+
+  .recent-section,
+  .analytics-section,
+  .session-overview,
+  .how-it-works {
+    padding: 15px;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+}
